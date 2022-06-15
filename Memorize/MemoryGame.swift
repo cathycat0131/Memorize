@@ -12,14 +12,22 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
     
     private(set) var theme: Array<Theme>
     
-    private var indexOfTheOneAndOnlyFaceUpCard: Int? //The index of the only card that is up
+    private var indexOfTheOneAndOnlyFaceUpCard: Int? { //The index of the only card that is up
+        get {
+            cards.indices.filter({cards[$0].isFaceUp}).oneAndOnly
+        }
+        set {
+            cards.indices.forEach{cards[$0].isFaceUp = ($0 == newValue)}
+        }
+    }
     
     var score: Int = 0
     
     //Game logic to match cards
     mutating func choose(_ card: Card) {
         //Find the chosen card index
-        if let chosenIndex = cards.firstIndex(where: { $0.id == card.id }), !cards[chosenIndex].isFaceUp,
+        if let chosenIndex = cards.firstIndex(where: { $0.id == card.id }),
+            !cards[chosenIndex].isFaceUp,
             !cards[chosenIndex].isMatched {
             //Check whether there is only one card faced up
             if let potentialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {
@@ -32,10 +40,9 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 } else {
                     score -= 1
                 }
-                //Set the index to null
-                indexOfTheOneAndOnlyFaceUpCard = nil
-            }
-            //If there is no only index and one chose another card
+                //Turn the card
+                cards[chosenIndex].isFaceUp.toggle()
+            } //If there is no only index and one chose another card
             else {
                 //Turn all the cards face down
                 for index in 0..<cards.count {
@@ -45,8 +52,6 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 //Set the new only index
                 indexOfTheOneAndOnlyFaceUpCard = chosenIndex
             }
-            //Turn the card
-            cards[chosenIndex].isFaceUp.toggle()
         }
     }
     
@@ -80,4 +85,14 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         var id: Int
     }
     
+}
+
+extension Array {
+    var oneAndOnly: Element? {
+        if count == 1 {
+            return first
+        } else {
+            return nil
+        }
+    }
 }

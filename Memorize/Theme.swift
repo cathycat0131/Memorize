@@ -12,7 +12,7 @@ struct Theme {
     var name: String 
     
     var myEmojis: Array<String>
-    var numOfPair: Int
+    var numOfPair: Int = 8
     
     var colour: UIColor
 }

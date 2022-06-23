@@ -8,34 +8,80 @@
 import SwiftUI
 
 struct MemoryGameView: View {
-   @ObservedObject var game: EmojiMemoryGame //Create viewModel that subscribe to EmojiMemoryGame viewmodel
+    //Create viewModel that subscribe to EmojiMemoryGame viewmodel
+   @ObservedObject var game: EmojiMemoryGame
 
     var body: some View {
-        //Text("Memorize")
-        VStack {
+        VStack(alignment: .center) {
+            //Text("Memorize")
+               // .font(.largeTitle)
             Text("\(EmojiMemoryGame.currentTheme.name)")
-                .font(.largeTitle)
-            AspectVGrid(items: game.cards, aspectRatio: 2/3, content: { card in
-                CardView(card: card)
-                    .padding(4)
-                    .onTapGesture {
-                        game.choose(card) //Express intent to choose a card
-                    }
-                })
-            .foregroundColor(Color(EmojiMemoryGame.currentTheme.colour))
-            .padding(.horizontal)
-            .opacity(0.8)
-            HStack {
-                Button(action: {
-                    game.startNewGame()
-                },
-                label:{
-                    Text("New Game")})
+                .font(.title).bold()
+            gamebody
+            HStack{
+                VStack(spacing: 5) {
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 1)) {
+                            game.startNewGame()
+                        }
+                    },
+                    label:{
+                        Text("New Game")})
+                    shuffle
+                }
+                .font(.headline)
                 Spacer()
                 Text("Score: \(game.getScore())")
                     .foregroundColor(.white)
                     .font(.title)
-            }.padding(20)
+            }.padding(10)
+        }
+        .padding(10)
+    }
+    
+    @State private var dealt = Set<Int>()
+    
+    private func deal(_ card: EmojiMemoryGame.Card) {
+        dealt.insert(card.id)
+    }
+    
+    private func isUndealt(_ card: EmojiMemoryGame.Card) -> Bool {
+        !dealt.contains(card.id)
+    }
+    
+    var gamebody: some View {
+        AspectVGrid(items: game.cards, aspectRatio: 2/3) { card in
+            if isUndealt(card) || (card.isMatched && !card.isFaceUp){
+                Color.clear
+            } else{
+                CardView(card: card)
+                    .padding(3)
+                    .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.5)))
+                    .onTapGesture {
+                        withAnimation() {
+                            game.choose(card) //Express intent to choose a card
+                        }
+                    }
+                }
+            }
+            .onAppear {
+                // "deal" cards
+                withAnimation {
+                    for card in game.cards {
+                        deal(card)
+                    }
+                }
+        }
+        .foregroundColor(Color(EmojiMemoryGame.currentTheme.colour))
+        .padding(.horizontal)
+    }
+    
+    var shuffle: some View
+    {
+        Button("Shuffle") {
+            withAnimation(.easeInOut(duration: 1)) {
+                game.shuffle()
+            }
         }
     }
 }
@@ -47,18 +93,21 @@ struct CardView: View {
     var body: some View {
         GeometryReader(content: {geometry in
             ZStack() {
-                let shape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius) //Create each card shape
-                if card.isFaceUp { //Turn over card
-                    shape.fill().foregroundColor(.white)
-                    shape.stroke(lineWidth: DrawingConstants.lineWidth)
-                    Text(card.content).font(font(in: geometry.size))
-                } else if card.isMatched {
-                    shape.opacity(0) //Remove card
-                } else {
-                    shape.fill() //Turn down card
-                }
+                Pie(startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 45), clockwise: false)
+                    .padding(5)
+                    .opacity(0.5)
+                Text(card.content)
+                    .font(font(in: geometry.size))
+                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
+                    .animation(Animation.easeInOut(duration: 1))
+                    .scaleEffect(scale(thatFits: geometry.size))
            }
+            .cardify(isFaceUp: card.isFaceUp)
         })
+    }
+    
+    private func scale(thatFits size: CGSize) -> CGFloat {
+        min(size.width, size.height) / (DrawingConstants.fontSize / DrawingConstants.fontScale)
     }
     
     private func font(in size: CGSize) -> Font {
@@ -66,9 +115,8 @@ struct CardView: View {
     }
     
     private struct DrawingConstants {
-        static let cornerRadius: CGFloat = 10
-        static let lineWidth: CGFloat = 3
-        static let fontScale: CGFloat = 0.7
+        static let fontScale: CGFloat = 0.6
+        static let fontSize: CGFloat = 48
     }
 }
 

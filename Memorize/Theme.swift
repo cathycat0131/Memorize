@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 
 struct Theme {
     var name: String 
@@ -14,5 +15,5 @@ struct Theme {
     var myEmojis: Array<String>
     var numOfPair: Int = 8
     
-    var colour: UIColor
+    var colour: CGColor
 }

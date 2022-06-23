@@ -13,10 +13,10 @@ class EmojiMemoryGame: ObservableObject {
     static var themes: Array<Theme> = [Theme(name: "Fruit", myEmojis: ["🍏", "🍎", "🍊","🍇", "🍓",
                                                                 "🍋","🍑","🥭","🍍","🥥",
                                                                 "🥝", "🍅", "🍆", "🥑", "🥦",
-                                                                       "🥬", "🥒"], colour: .systemPink),
+                                                                       "🥬", "🥒"], colour: CGColor(red: 0.85, green: 0.2, blue: 0.2, alpha: 1)),
                                 Theme(name: "Car", myEmojis: ["🚗", "🚕", "🚙", "🚌", "🚎",
                                                               "🏎", "🚓", "🚑", "🚒", "🚐",
-                                                              "🛻", "🚚","🚛", "🚜", "🛵"], colour: .purple)]
+                                                              "🛻", "🚚","🚛", "🚜", "🛵"], colour: CGColor(red: 0.2, green: 0.3, blue: 0.8, alpha: 1))]
     static var currentTheme = themes[Int.random(in: 0..<2)]
     
     //Function to populate card content for the game
@@ -37,6 +37,10 @@ class EmojiMemoryGame: ObservableObject {
     //MARK: - Intent(s)
     func choose(_ card: Card) {
         return model.choose(card)
+    }
+    
+    func shuffle() {
+        model.shuffle()
     }
     
     func getScore() -> Int {

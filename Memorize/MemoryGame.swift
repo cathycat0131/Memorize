@@ -48,11 +48,14 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 for index in 0..<cards.count {
                     cards[index].isFaceUp = false
                 }
-    
                 //Set the new only index
                 indexOfTheOneAndOnlyFaceUpCard = chosenIndex
             }
         }
+    }
+    
+    mutating func shuffle() {
+        cards.shuffle()
     }
     
     //Initialize cards for game
@@ -68,14 +71,6 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
             cards.insert(Card(content: content, id: pairIndex * 2 + 1), at: Int.random(in: 0...numInserted))
             numInserted += 1
         }
-        
-        theme.append(Theme(name: "fruit", myEmojis: ["🍏", "🍎", "🍊","🍇", "🍓",
-                                          "🍋","🍑","🥭","🍍","🥥",
-                                          "🥝", "🍅", "🍆", "🥑", "🥦",
-                                                         "🥬", "🥒"], numOfPair: 6, colour: .red))
-        theme.append(Theme(name: "car", myEmojis: ["🚗", "🚕", "🚙", "🚌", "🚎",
-                                                   "🏎", "🚓", "🚑", "🚒", "🚐",
-                                                  "🛻", "🚚","🚛", "🚜", "🛵"], numOfPair: 6, colour: .blue))
     }
     
     struct Card: Identifiable {
